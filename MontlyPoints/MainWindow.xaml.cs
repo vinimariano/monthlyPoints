@@ -1,37 +1,38 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Input;
 using Newtonsoft.Json;
 
 namespace MontlyPoints
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// </summary>
-	public partial class MainWindow : Window
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
 	{
-		#region Declarations
+        #region Declarations
 
-		public int NivelPontualidade { get; set; }
+        public int NivelPontualidade = 5;
 		public int HoraEntrada { get; set; }
 		public int MinutosEntrada { get; set; }
 		public int HoraSaida { get; set; }
 		public int MinutosSaida { get; set; }
+		public string DiaInicial { get; set; }
+		public int TotalLinhas { get; set; }
+        public DateTime DataInicial { get; set; }
+        public DateTime DataFinal { get; set; }
 
-		#endregion
+        #endregion
 
-		#region Events
+        #region Events
 
-		public MainWindow()
+        public MainWindow()
 		{
 			InitializeComponent();
 			CarregarValoresPadrao();
@@ -51,9 +52,31 @@ namespace MontlyPoints
 
 		#region Methods
 
+        /// <summary>
+        /// Carrega os valores-padrão do programa
+        /// </summary>
 		private void CarregarValoresPadrao()
 		{
-			txtHora.Text = "09";
+            DateTime dataHoje = DateTime.Today;
+            string diaFinal = string.Empty;
+
+            //Recupera os valores do app.config
+            DiaInicial = System.Configuration.ConfigurationManager.AppSettings["diaInicial"].ToString();
+            diaFinal = System.Configuration.ConfigurationManager.AppSettings["diaFinal"].ToString();
+
+            //Calcula a dataInicial, pegando a data do app config e aplicando no mês passado
+            DataInicial = new DateTime(dataHoje.AddMonths(-1).Year,
+                        dataHoje.AddMonths(-1).Month, int.Parse(DiaInicial));
+
+            //Calcula a dataFinal, pegando a data do app config e aplicando no mês atual
+            DataFinal = new DateTime(dataHoje.AddMonths(-1).Year,
+                        dataHoje.Month, int.Parse(diaFinal));
+
+            //Calcula o total de linhas
+            TotalLinhas = Convert.ToInt32((DataFinal - DataInicial).TotalDays) + 16;
+
+            //Seta os valores-padrão dos controles
+            txtHora.Text = "09";
 			txtMinutos.Text = "00";
 		}
 
@@ -68,28 +91,20 @@ namespace MontlyPoints
 				FileInfo fileInfo;
 				ExcelPackage excelPackage;
 				ExcelWorksheet planilha;
-				DateTime dataCorrente = DateTime.MinValue;
 				Random random = new Random();
-				DateTime dataHoje = DateTime.Today;
+				DateTime dataContador = DateTime.Today;
 				string pathNovoDocumento = string.Empty;
-				int totalLinhas = int.MinValue;
 				int diasNoMes = int.MinValue;
 				int diferenca = int.MinValue;
 
 				//Se campos forem válidos
 				if (ValidarCampos())
 				{
-					//Multiplica o valor do slider por 10
-					NivelPontualidade = Convert.ToInt32(SliderPontualidade.Value) * 10;
-
 					//Obtem os horarios de entradaSaida
 					CalcularHoraEntradaSaida();
 
 					//Busca os feriados na API
 					feriados = RetornarFeriados();
-
-					//Obtêm o total das linhas
-					totalLinhas = 46;
 
 					//Obtêm o novoDocumento
 					fileInfo = PrepararArquivo(out pathNovoDocumento);
@@ -98,34 +113,35 @@ namespace MontlyPoints
 					//Obtêm a planilha
 					planilha = excelPackage.Workbook.Worksheets["planilha"];
 
-					//Calcula a data inicial
-					dataCorrente = new DateTime(dataHoje.AddMonths(-1).Year,
-						dataHoje.AddMonths(-1).Month, 21);
-
 					//Preenche o cabeçalho da planilha
 					PreencherCabecalho(planilha);
 
-					//Calcula os dias no mês
-					diasNoMes = DateTime.DaysInMonth(dataHoje.AddMonths(-1).Year,
-									dataHoje.AddMonths(-1).Month);
+					//Calcula quantos dias o mês passado teve 28/29/30/31
+					diasNoMes = DateTime.DaysInMonth(DateTime.Today.AddMonths(-1).Year,
+                                    DateTime.Today.AddMonths(-1).Month);
 
 					//Se for menos de 31 dias tira as linhas que sobraram
 					if (diasNoMes < 31)
 					{
 						diferenca = 31 - diasNoMes;
 						planilha.DeleteRow(diasNoMes - 5, diferenca, true);
-						totalLinhas = 46 - diferenca;
+						TotalLinhas -= diferenca;
 					}
 
-					//Começa a preencher as linhas do grid, o grid começa na linha 15
-					for (int counter = 15; counter < totalLinhas; counter++)
+                    //Atribui a variável que será usada como contador
+                    dataContador = DataInicial;
+
+                    //Começa a preencher as linhas do grid, o grid começa na linha 15
+                    for (int counter = 15; counter < TotalLinhas; counter++)
 					{
-						//Se for fim de semana ou feriado pinta a linha
-						if
+                        PreencherDias(planilha, dataContador, counter);
+
+                        //Se for fim de semana ou feriado pinta a linha
+                        if
 						(
-							dataCorrente.DayOfWeek == DayOfWeek.Sunday ||
-							dataCorrente.DayOfWeek == DayOfWeek.Saturday ||
-							feriados.Any(feriado => feriado.DataFeriado.Date == dataCorrente.Date)
+                            dataContador.DayOfWeek == DayOfWeek.Sunday ||
+                            dataContador.DayOfWeek == DayOfWeek.Saturday ||
+							feriados.Any(feriado => feriado.DataFeriado.Date == dataContador.Date)
 						)
 						{
 							PintarLinha(planilha, counter);
@@ -137,8 +153,10 @@ namespace MontlyPoints
 							PreencherIntervalo2(planilha, counter, random);
 						}
 
-						dataCorrente = dataCorrente.AddDays(1);
+                        dataContador = dataContador.AddDays(1);
 					}
+
+                    planilha = LimparLinhasSobrando(planilha);
 
 					excelPackage.Save();
 
@@ -147,15 +165,38 @@ namespace MontlyPoints
 			}
 		}
 
-		/// <summary>
-		/// Valida os inputs
-		/// </summary>
-		private bool ValidarCampos()
+        /// <summary>
+        /// Deleta as linhas que estão sobrando na planilha
+        /// </summary>
+        /// <param name="planilha"></param>
+        private ExcelWorksheet LimparLinhasSobrando(ExcelWorksheet planilha)
+        {
+            var inicioPlanilha = planilha.Dimension.Start;
+            var fimPlanilha = planilha.Dimension.End;
+
+            //Itera pelas linhas da planilha
+            for (int row = inicioPlanilha.Row; row <= fimPlanilha.Row; row++)
+            {
+                //Se dia for 0 deleta a linha
+                if(planilha.Cells[row, 1].Text == "0")
+                {
+                    planilha.DeleteRow(row);
+                    row--;
+                }
+            }
+
+            return planilha;
+        }
+
+        /// <summary>
+        /// Valida os inputs
+        /// </summary>
+        private bool ValidarCampos()
 		{
 			bool valido = true;
 
 			if (string.IsNullOrWhiteSpace(txtMinutos.Text) || string.IsNullOrWhiteSpace(txtHora.Text) || string.IsNullOrWhiteSpace(txtNome.Text)
-				|| string.IsNullOrWhiteSpace(txtfuncao.Text) || string.IsNullOrWhiteSpace(txctCpf.Text))
+				|| string.IsNullOrWhiteSpace(txtfuncao.Text) || string.IsNullOrWhiteSpace(txctCpf.Text) || string.IsNullOrWhiteSpace(txtMatricula.Text))
 			{
 				MessageBox.Show("Informe todos os campos para prosseguir");
 				valido = false;
@@ -267,33 +308,14 @@ namespace MontlyPoints
 			mesPassado = ConverterMes(dataSelecionada.AddMonths(-1).Month);
 			mesAtual = ConverterMes(dataSelecionada.Month);
 
-			myWorksheet.Cells[8, 2].Value = txtNome.Text;
+			myWorksheet.Cells[8, 1].Value = txtNome.Text;
             myWorksheet.Cells[8, 10].Value = txctCpf.Text;
+            myWorksheet.Cells[6, 10].Value = txtMatricula.Text;
             myWorksheet.Cells[10, 1].Value = txtfuncao.Text;      			
             myWorksheet.Cells[10, 9].Value = horarioTrabalho; //Hora de Trabalho
 			myWorksheet.Cells[4, 1].Value = string.Format("{0}/{1}", mesPassado.ToLower(), mesAtual.ToLower());
             myWorksheet.Cells[4, 3].Value = dataSelecionada.Year;
-            myWorksheet.Cells[4, 3].Value = dataSelecionada.Year;
         }
-
-		/// <summary>
-		/// Calcula as horas de entrada e saída
-		/// </summary>
-		private void CalcularHoraEntradaSaida()
-		{
-			int horaEntrada = int.MinValue;
-			int minutosEntrada = int.MinValue;
-
-			//Pega a hora de entrada especificada
-			int.TryParse(txtHora.Text, out horaEntrada);
-			int.TryParse(txtMinutos.Text, out minutosEntrada);
-
-			HoraEntrada = horaEntrada;
-			MinutosEntrada = minutosEntrada;
-
-			//Calcula a hora de saída
-			HoraSaida = horaEntrada + 9;
-		}
 
 		/// <summary>
 		/// Converte o int mes em string
@@ -307,6 +329,7 @@ namespace MontlyPoints
             switch (mes)
 
             {
+                default:
                 case 1:
                     mesConvertido = "Janeiro";
                     break;
@@ -354,31 +377,41 @@ namespace MontlyPoints
                 case 12:
                     mesConvertido = "Dezembro";
                     break;
-
-                default:
-                    mesConvertido = "Janeiro";
-                    break;
             }
 
             return mesConvertido;
         }
 
-		/// <summary>
-		/// Preenche os horários de intervalo
-		/// </summary>
-		/// <param name="myWorksheet"></param>
-		/// <param name="counter"></param>
-		/// <param name="rn"></param>
+        #region PreencherLinhas    
+
+        /// <summary>
+        /// Preenche os pontos de entrada e saída
+        /// </summary>
+        /// <param name="myWorksheet"></param>
+        /// <param name="counter"></param>
+        /// <param name="random"></param>
+        private void PreencherDias(ExcelWorksheet myWorksheet, DateTime data, int counter)
+        {
+            //Preenche a célula de dia
+            myWorksheet.Cells[counter, 1].Value = data.Day;              
+        }
+
+        /// <summary>
+        /// Preenche os horários de intervalo
+        /// </summary>
+        /// <param name="myWorksheet"></param>
+        /// <param name="counter"></param>
+        /// <param name="rn"></param>
         private void PreencherIntervalo2(ExcelWorksheet myWorksheet, int counter, Random rn)
         {
-			string minutesstr = string.Empty;
+			string minutesStr = string.Empty;
 			int minutes = int.MinValue;
 
 			minutes = rn.Next(0, NivelPontualidade);
-            minutesstr = minutes.ToString().Length < 2 ? "0" + minutes.ToString() : minutes.ToString();
+            minutesStr = minutes.ToString().Length < 2 ? "0" + minutes.ToString() : minutes.ToString();
 
-            myWorksheet.Cells[counter, 5].Value = string.Format("12:{0}", minutesstr);
-            myWorksheet.Cells[counter, 6].Value = string.Format("13:{0}", minutesstr);
+            myWorksheet.Cells[counter, 5].Value = string.Format("12:{0}", minutesStr);
+            myWorksheet.Cells[counter, 6].Value = string.Format("13:{0}", minutesStr);
         }
 
         /// <summary>
@@ -405,11 +438,30 @@ namespace MontlyPoints
             myWorksheet.Cells[counter, 9].Value = string.Format("{0}:{1}", HoraSaida, minutosEmTexto);
         }
 
-		/// <summary>
-		/// Preenche as colunas de uma determinada linha
-		/// </summary>
-		/// <param name="dt"></param>
-		/// <param name="counter"></param>
+        /// <summary>
+        /// Calcula as horas de entrada e saída
+        /// </summary>
+        private void CalcularHoraEntradaSaida()
+        {
+            int horaEntrada = int.MinValue;
+            int minutosEntrada = int.MinValue;
+
+            //Pega a hora de entrada especificada
+            int.TryParse(txtHora.Text, out horaEntrada);
+            int.TryParse(txtMinutos.Text, out minutosEntrada);
+
+            HoraEntrada = horaEntrada;
+            MinutosEntrada = minutosEntrada;
+
+            //Calcula a hora de saída
+            HoraSaida = horaEntrada + 9;
+        }
+
+        /// <summary>
+        /// Preenche as colunas de uma determinada linha
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="counter"></param>
         private void PintarLinha(ExcelWorksheet excelWorksheet, int counter)
         {
             for (int coluna = 1; coluna < 14; coluna++)
@@ -419,6 +471,7 @@ namespace MontlyPoints
             }
         }
 
-		#endregion
-	}
+        #endregion
+        #endregion
+    }
 }

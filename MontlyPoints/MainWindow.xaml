@@ -6,27 +6,26 @@
         xmlns:local="clr-namespace:MontlyPoints"
         mc:Ignorable="d"
         Title="Montly Points" Height="297.401" Width="793.316" WindowStartupLocation="CenterScreen">
-	<Grid Opacity="0.8" Margin="-2,0,2,2">
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="114*"/>
-			<ColumnDefinition Width="671*"/>
-		</Grid.ColumnDefinitions>
-		<Button Content="Processar Folha" HorizontalAlignment="Left" Margin="221,218,0,0" VerticalAlignment="Top" Width="113" Click="Button_Click" Height="36" Grid.Column="1"/>
-		<TextBox x:Name="txtNome" HorizontalAlignment="Left" Height="23" Margin="24.931,73,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="309" RenderTransformOrigin="-0.021,1.821" Grid.Column="1"/>
-		<Label Content="Nome" HorizontalAlignment="Left" Margin="56,70,0,0" VerticalAlignment="Top"/>
-		<Label Content="Função" HorizontalAlignment="Left" Margin="56,117,0,0" VerticalAlignment="Top"/>
-		<TextBox x:Name="txtfuncao" HorizontalAlignment="Left" Height="23" Margin="25,117,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="309" Grid.Column="1"/>
-		<TextBox x:Name="txctCpf" HorizontalAlignment="Left" Height="23" Margin="397.931,70,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="194" RenderTransformOrigin="-0.021,1.821" Grid.Column="1"/>
-		<Label Content="CPF" HorizontalAlignment="Left" Margin="349.931,70,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-		<Label Content="Hora de Entrada" HorizontalAlignment="Left" Margin="415,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-		<Image Grid.Column="1" Margin="451,178,191,61" Source="brasil.png" Stretch="Fill"/>
-		<Image Grid.Column="1" Margin="115,178,527,61" Source="Bandeira-da-Gra-Bretanha.png" Stretch="Fill"/>
-		<Slider x:Name="SliderPontualidade" Grid.Column="1" HorizontalAlignment="Left" Margin="144,178,0,0" VerticalAlignment="Top" Width="307" Height="25" Maximum="5.9" Value="3"/>
-		<Label Content="Nível de Pontualidade" Grid.Column="1" HorizontalAlignment="Left" Margin="242,152,0,0" VerticalAlignment="Top"/>
-		<Label Content="v. 1.5" Grid.Column="1" HorizontalAlignment="Left" Margin="569,221,0,0" VerticalAlignment="Top"/>
-		<TextBox x:Name="txtHora" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="521,120,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="29" MaxLength="2" TextChanged="TxtHora_TextChanged"/>
-		<Label Content=":" Grid.Column="1" HorizontalAlignment="Left" Margin="550,116,0,0" VerticalAlignment="Top"/>
-		<TextBox x:Name="txtMinutos" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="563,120,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="29" MaxLength="2"/>
+    <Grid Opacity="0.8" Margin="-2,0,2,2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="114*"/>
+            <ColumnDefinition Width="671*"/>
+        </Grid.ColumnDefinitions>
+        <Button Content="Processar Folha" HorizontalAlignment="Left" Margin="221,218,0,0" VerticalAlignment="Top" Width="113" Click="Button_Click" Height="36" Grid.Column="1" TabIndex="7"/>
+        <TextBox x:Name="txtNome" HorizontalAlignment="Left" Height="23" Margin="24.931,73,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="309" RenderTransformOrigin="-0.021,1.821" Grid.Column="1" TabIndex="1"/>
+        <Label Content="Nome" HorizontalAlignment="Left" Margin="56,70,0,0" VerticalAlignment="Top"/>
+        <Label Content="Função" HorizontalAlignment="Left" Margin="56,117,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtfuncao" HorizontalAlignment="Left" Height="23" Margin="25,117,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="309" Grid.Column="1" TabIndex="3"/>
+        <TextBox x:Name="txctCpf" HorizontalAlignment="Left" Height="23" Margin="397.931,70,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="194" RenderTransformOrigin="-0.021,1.821" Grid.Column="1" TabIndex="2"/>
+        <Label Content="CPF" HorizontalAlignment="Left" Margin="349.931,70,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <Label Content="Hora de Entrada" HorizontalAlignment="Left" Margin="29,155,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Label Content="v. 2.0" Grid.Column="1" HorizontalAlignment="Left" Margin="578.6,224,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtHora" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="24.6,155,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="29" MaxLength="2" TextChanged="TxtHora_TextChanged" TabIndex="5"/>
+        <Label Content=":" Grid.Column="1" HorizontalAlignment="Left" Margin="58.6,152,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtMinutos" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="71.6,155,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="29" MaxLength="2" TabIndex="6"/>
+        <TextBox x:Name="txtMatricula" HorizontalAlignment="Left" Height="23" Margin="413.6,117,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="178" RenderTransformOrigin="-0.021,1.821" Grid.Column="1" TabIndex="4"/>
+        <Label Content="Matrícula" HorizontalAlignment="Left" Margin="349.6,116,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <Label Content="PROGRAMA DE AUXÍLIO À FOLHA DE PONTO" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="787" Focusable="True" HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="14"/>
 
-	</Grid>
+    </Grid>
 </Window>
