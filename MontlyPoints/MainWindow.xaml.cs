@@ -141,7 +141,9 @@ namespace MontlyPoints
 						(
                             dataContador.DayOfWeek == DayOfWeek.Sunday ||
                             dataContador.DayOfWeek == DayOfWeek.Saturday ||
-							feriados.Any(feriado => feriado.DataFeriado.Date == dataContador.Date)
+							feriados.Any(feriado => 
+                            feriado.DataFeriado.Date == dataContador.Date
+                            )
 						)
 						{
 							PintarLinha(planilha, counter);
@@ -218,7 +220,7 @@ namespace MontlyPoints
 
 			listaFeriados = JsonConvert.DeserializeObject<List<MDLFeriado>>(File.ReadAllText(Path.Combine(pastaParente, "Feriados.json")));
 
-			listaFeriados = listaFeriados.Where(feriado => feriado.DataFeriado.Year == DateTime.Now.Year).ToList();
+			listaFeriados = listaFeriados.Where(feriado => feriado.DataFeriado.Year == DateTime.Now.Year || feriado.DataFeriado.Year == (DateTime.Now.Year - 1)).ToList();
 
 			return listaFeriados;
 		}
