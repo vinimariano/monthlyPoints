@@ -69,7 +69,7 @@ namespace MontlyPoints
                         dataHoje.AddMonths(-1).Month, int.Parse(DiaInicial));
 
             //Calcula a dataFinal, pegando a data do app config e aplicando no mês atual
-            DataFinal = new DateTime(dataHoje.AddMonths(-1).Year,
+            DataFinal = new DateTime(dataHoje.Year,
                         dataHoje.Month, int.Parse(diaFinal));
 
             //Calcula o total de linhas
@@ -276,7 +276,7 @@ namespace MontlyPoints
             directoryInfo = Directory.CreateDirectory(string.Format("{0}/documentos/", pastaParente));
 
             //Obtem os paths
-            pathTemplate = string.Format("{0}//template.xlsx", pastaParente);
+            pathTemplate = string.Format("{0}\\template.xlsx", pastaParente);
             pathNovoDocumento = string.Format("{0}/documentos/{1}.xlsx", pastaParente, DateTime.Now.ToString("ddMMyyyyHHmmss"));
 
 			//Gera o novoDocumento
